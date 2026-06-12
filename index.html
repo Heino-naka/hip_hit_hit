@@ -1,4 +1,4 @@
-:おしりぺんぺん達人・SNSシェア機能搭載版:index.html
+:おしりぺんぺん達人・画像ダウンロード機能搭載版:index.html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -90,30 +90,34 @@
         </div>
 
         <div id="resultScreen" class="absolute inset-0 bg-black/85 rounded-2xl flex flex-col items-center justify-center text-white p-4 text-center z-20 hidden">
-            <span class="text-5xl mb-1">🏆</span>
-            <h2 class="text-2xl font-black text-amber-400 mb-1">しゅうりょう！</h2>
+            <span class="text-4xl mb-1">🏆</span>
+            <h2 class="text-xl font-black text-amber-400 mb-1">しゅうりょう！</h2>
             
-            <div class="my-2 bg-white/10 p-3 rounded-xl w-full max-w-[280px]">
+            <div class="my-1 bg-white/10 p-2.5 rounded-xl w-full max-w-[260px]">
                 <p class="text-gray-300 text-[10px]">あなたのおしり叩きスコア</p>
                 <p id="finalScore" class="text-3xl font-black text-rose-400 my-0.5">0 点</p>
                 <p id="finalCombo" class="text-xs text-amber-300">最大コンボ: 0</p>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-3">
                 <p class="text-[10px] text-gray-300">授与された称号</p>
-                <p id="finalRank" class="text-xl font-black text-yellow-300 animate-pulse mt-0.5">？？？</p>
+                <p id="finalRank" class="text-lg font-black text-yellow-300 animate-pulse mt-0.5">？？？</p>
             </div>
 
             <div class="w-full flex flex-col items-center gap-2">
-                <button id="restartButton" class="w-full max-w-[240px] py-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-base shadow-lg hover:scale-105 active:scale-95 transition-all text-white border-2 border-white">
+                <button id="restartButton" class="w-full max-w-[240px] py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all text-white border-2 border-white">
                     もういっかい遊ぶ！
                 </button>
 
-                <button id="shareTwitterButton" class="w-full max-w-[240px] py-2.5 bg-[#1da1f2] hover:bg-[#1a91da] rounded-full font-black text-sm flex items-center justify-center gap-2 transition-all text-white border border-white/20 hover:scale-105 active:scale-95">
+                <button id="downloadImageButton" class="w-full max-w-[240px] py-2 bg-amber-500 hover:bg-amber-600 rounded-full font-black text-sm flex items-center justify-center gap-2 transition-all text-white border border-white/10 hover:scale-105 active:scale-95">
+                    📥 結果を画像として保存 (DL)
+                </button>
+
+                <button id="shareTwitterButton" class="w-full max-w-[240px] py-2 bg-[#1da1f2] hover:bg-[#1a91da] rounded-full font-black text-sm flex items-center justify-center gap-2 transition-all text-white border border-white/10 hover:scale-105 active:scale-95">
                     <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
                     </svg>
-                    結果を𝕏にポストする
+                    結果を𝕏にテキスト投稿する
                 </button>
             </div>
         </div>
@@ -128,7 +132,7 @@
 
 <script>
 /**
- * おしりぺんぺんゲーム メインシステム（SNSシェア対応完全版）
+ * おしりぺんぺんゲーム メインシステム（画像保存＆SNS対応完全版）
  */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -138,6 +142,7 @@ const startButton = document.getElementById('startButton');
 const resultScreen = document.getElementById('resultScreen');
 const restartButton = document.getElementById('restartButton');
 const shareTwitterButton = document.getElementById('shareTwitterButton');
+const downloadImageButton = document.getElementById('downloadImageButton');
 const muteButton = document.getElementById('muteButton');
 const highScoreText = document.getElementById('highScoreText');
 
@@ -161,7 +166,7 @@ let chosenTime = 30;
 let timeLeft = 30;
 let timerInterval = null;
 let isMuted = false;
-let currentRankName = ""; // シェア用の称号テキスト保持
+let currentRankName = ""; // シェア・画像描画用の称号テキスト
 
 const UNLOCK_SCORE_LIMIT = 8000;
 
@@ -415,23 +420,29 @@ muteButton.addEventListener('click', (e) => {
 startButton.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 restartButton.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 
-// 𝕏 (Twitter) シェア処理
+// 𝕏 (Twitter) テキストシェア処理
 shareTwitterButton.addEventListener('click', (e) => {
     e.stopPropagation();
-    
-    // モードごとの補足テキスト
     let modeLabel = `${chosenTime}秒モード`;
     if (chosenTime === 60) modeLabel = "👑 隠し・伝説の60秒モード 👑";
     
-    // ポスト用文面の生成
-    const shareText = `🍑 おしりぺんぺん達人 🍑\n【プレイモード】 ${modeLabel}\n【今回のスコア】 ${score} 点\n【最大コンボ】 ${maxCombo} ぺんぺん\n【獲得した称号】 ${currentRankName}\n\n叩き出した神速リズムを体感せよ！みんなもレッツ・ぺんぺん！\n#おしりぺんぺん達人 #音ゲー #無料ゲーム`;
-    
-    // 現在のゲームURL（デプロイ先環境に合わせて自動抽出。ローカルならローカルURL）
+    const shareText = `🍑 おしりぺんぺん達人 🍑\n【プレイモード】 ${modeLabel}\n【今回のスコア】 ${score} 点\n【最大コンボ】 ${maxCombo} ぺんぺん\n【獲得した称号】 ${currentRankName}\n\n保存した画像を添付して神速リズムを自慢しよう！\n#おしりぺんぺん達人 #音ゲー #無料ゲーム`;
     const gameUrl = window.location.href;
-    
-    // インテントリンク作成＆ポップアップ
     const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(gameUrl)}`;
     window.open(twitterIntentUrl, '_blank', 'noopener,noreferrer');
+});
+
+// 画像保存 (ダウンロード) 処理
+downloadImageButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    try {
+        const link = document.createElement('a');
+        link.download = `oshiri_達人結果_${score}点.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } catch (err) {
+        console.error("画像保存に失敗しました", err);
+    }
 });
 
 window.addEventListener('keydown', (e) => {
@@ -513,7 +524,7 @@ function endGame() {
         becameUnlockedThisTime = true;
     }
     
-    // 称号判定＆グローバル保持
+    // 称号の決定
     if (score >= 15000) currentRankName = "✨ 宇宙のぺんぺん創造神 ✨";
     else if (score >= 10000) currentRankName = "👑 伝説のゴッドハンド 👑";
     else if (score >= 8000) currentRankName = "🔥 超プロ・ぺんぺにすと 🔥";
@@ -702,7 +713,7 @@ function drawHand(ctx, x, y, isLeft) {
 function drawPerfectButt(ctx, timestamp) {
     const cx = canvas.width / 2;
     const cy = 410;
-    const idleBounce = Math.sin(timestamp / 160) * 1.5;
+    const idleBounce = gameState === "PLAYING" ? Math.sin(timestamp / 160) * 1.5 : 0;
 
     const b0 = butts[0]; 
     const b1 = butts[1]; 
@@ -761,7 +772,7 @@ function drawPerfectButt(ctx, timestamp) {
         ctx.save();
         ctx.fillStyle = `rgba(239, 68, 68, ${b1.redness * 0.38})`;
         ctx.beginPath();
-        ctx.ellipse(cx - baseW * 0.5, cy + 25, 40, 35, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + baseW * 0.5, cy + 25, 40, 35, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
@@ -784,6 +795,7 @@ function gameLoop(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const isFever = combo >= 10;
 
+    // 背景描画
     if (isFever && gameState === "PLAYING") {
         const bgHue = (timestamp / 4.5) % 360;
         ctx.fillStyle = `hsla(${bgHue}, 90%, 96%, 1)`;
@@ -813,12 +825,14 @@ function gameLoop(timestamp) {
         }
     }
 
+    // レーンガイド
     ctx.strokeStyle = "rgba(74, 74, 74, 0.02)";
     ctx.lineWidth = 30;
     for (let i = 0; i < lanes.length; i++) {
         ctx.beginPath(); ctx.moveTo(lanes[i].x, 0); ctx.lineTo(lanes[i].x, canvas.height); ctx.stroke();
     }
 
+    // おしりの状態更新
     for (let i = 0; i < butts.length; i++) {
         const b = butts[i];
         b.squishX += (0 - b.squishX) * 0.15;
@@ -869,6 +883,7 @@ function gameLoop(timestamp) {
         updateBgmScheduler();
     }
 
+    // パーティクル＆テキストエフェクト
     for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.x += p.vx; p.y += p.vy;
@@ -908,6 +923,7 @@ function gameLoop(timestamp) {
         if (t.alpha <= 0) { textEffects.splice(i, 1); i--; }
     }
 
+    // プレイ中のUI表示
     if (gameState === "PLAYING") {
         ctx.save();
         ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
@@ -952,6 +968,71 @@ function gameLoop(timestamp) {
             }
             ctx.restore();
         }
+        ctx.restore();
+    }
+
+    // ★画像保存用：ゲームオーバー画面をCanvas側にも直接レンダリング
+    if (gameState === "GAMEOVER") {
+        ctx.save();
+        // 背景を薄暗くマスク
+        ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // リザルトボードの枠
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#e11d48";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.roundRect(35, 45, canvas.width - 70, 440, 24);
+        ctx.fill();
+        ctx.stroke();
+
+        // ヘッダーテキスト
+        ctx.fillStyle = "#e11d48";
+        ctx.font = "900 26px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🍑 ぺんぺん結果 🍑", canvas.width / 2, 95);
+
+        let modeLabel = `${chosenTime}秒モード`;
+        if (chosenTime === 60) modeLabel = "伝説の60秒モード";
+        ctx.fillStyle = "#4b5563";
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText(`【 プレイ環境：${modeLabel} 】`, canvas.width / 2, 125);
+
+        // スコア背景パネル
+        ctx.fillStyle = "#fff1f2";
+        ctx.beginPath();
+        ctx.roundRect(60, 150, canvas.width - 120, 95, 16);
+        ctx.fill();
+
+        ctx.fillStyle = "#9f1239";
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText("獲得スコア", canvas.width / 2, 175);
+
+        ctx.fillStyle = "#e11d48";
+        ctx.font = "900 38px monospace";
+        ctx.fillText(`${score} 点`, canvas.width / 2, 222);
+
+        // コンボ数
+        ctx.fillStyle = "#b45309";
+        ctx.font = "900 18px sans-serif";
+        ctx.fillText(`🔥 最大コンボ: ${maxCombo} 回`, canvas.width / 2, 282);
+
+        // 称号枠
+        ctx.fillStyle = "#6b7280";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText("授与された称号", canvas.width / 2, 330);
+
+        ctx.fillStyle = "#d97706";
+        ctx.font = "900 21px sans-serif";
+        ctx.fillText(currentRankName, canvas.width / 2, 368);
+
+        // フッター署名
+        ctx.fillStyle = "#9ca3af";
+        ctx.font = "bold 11px monospace";
+        ctx.fillText("めざせ神速！パーフェクト・おしりぺんぺん", canvas.width / 2, 428);
+        ctx.fillText(" Oshiri Penpen Master v3", canvas.width / 2, 448);
+        
         ctx.restore();
     }
 
