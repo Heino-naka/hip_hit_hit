@@ -1,4 +1,4 @@
-:コース変更・タイトル戻り対応版:index.html
+:バグ修正完了版:index.html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -141,7 +141,7 @@
 
 <script>
 /**
- * おしりぺんぺんゲーム メインシステム（コース変更・タイトル戻り対応完全版）
+ * おしりぺんぺんゲーム メインシステム（バグ修正完了版）
  */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -150,7 +150,7 @@ const startScreen = document.getElementById('startScreen');
 const startButton = document.getElementById('startButton');
 const resultScreen = document.getElementById('resultScreen');
 const restartButton = document.getElementById('restartButton');
-const toTitleButton = document.getElementById('toTitleButton'); // タイトル戻り
+const toTitleButton = document.getElementById('toTitleButton'); 
 const shareTwitterButton = document.getElementById('shareTwitterButton');
 const downloadImageButton = document.getElementById('downloadImageButton');
 const muteButton = document.getElementById('muteButton');
@@ -430,7 +430,6 @@ muteButton.addEventListener('click', (e) => {
 startButton.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 restartButton.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 
-// コースを選び直す（タイトル画面に戻る）イベント
 toTitleButton.addEventListener('click', (e) => {
     e.stopPropagation();
     initAudio();
@@ -441,7 +440,6 @@ toTitleButton.addEventListener('click', (e) => {
     updateMenuUI();
 });
 
-// 𝕏 (Twitter) テキストシェア処理
 shareTwitterButton.addEventListener('click', (e) => {
     e.stopPropagation();
     let modeLabel = `${chosenTime}秒モード`;
@@ -453,7 +451,6 @@ shareTwitterButton.addEventListener('click', (e) => {
     window.open(twitterIntentUrl, '_blank', 'noopener,noreferrer');
 });
 
-// 画像保存 (ダウンロード) 処理
 downloadImageButton.addEventListener('click', (e) => {
     e.stopPropagation();
     try {
@@ -545,7 +542,6 @@ function endGame() {
         becameUnlockedThisTime = true;
     }
     
-    // 称号の決定
     if (score >= 15000) currentRankName = "✨ 宇宙のぺんぺん創造神 ✨";
     else if (score >= 10000) currentRankName = "👑 伝説のゴッドハンド 👑";
     else if (score >= 8000) currentRankName = "🔥 超プロ・ぺんぺにすと 🔥";
@@ -578,7 +574,7 @@ function handleTap(laneIndex) {
         if (notes[i].lane === laneIndex) {
             const dist = Math.abs(notes[i].y - targetY);
             if (dist < minDistance) {
-                dist = minDistance;
+                minDistance = dist; // 【修正箇所1】代入の左右を修正
                 targetNoteIndex = i;
             }
         }
@@ -793,7 +789,7 @@ function drawPerfectButt(ctx, timestamp) {
         ctx.save();
         ctx.fillStyle = `rgba(239, 68, 68, ${b1.redness * 0.38})`;
         ctx.beginPath();
-        ctx.ellipse(cx - baseW * 0.5, cy + 25, 40, 35, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + baseW * 0.5, cy + 25, 40, 35, 0, 0, Math.PI * 2); // 【修正箇所2】右おしりのX座標をプラスに修正
         ctx.fill();
         ctx.restore();
     }
@@ -892,7 +888,8 @@ function gameLoop(timestamp) {
 
         for (let i = 0; i < notes.length; i++) {
             notes[i].y += currentSpeed;
-            drawHand(ctx, lanes[notes[i].lane].x, notes[notes[i].lane === 0]);
+            // 【修正箇所3】 drawHand の引数指定（Y座標の渡し方と、左右反転フラグのロジック）を修正
+            drawHand(ctx, lanes[notes[i].lane].x, notes[i].y, notes[i].lane === 0);
 
             if (notes[i].y > butts[notes[i].lane].targetY + 75) {
                 const lane = notes[i].lane;
