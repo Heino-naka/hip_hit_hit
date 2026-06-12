@@ -1,4 +1,4 @@
-:おしりぺんぺん達人・へいなか様クレジット＆画像DL搭載版:index.html
+:コース変更・タイトル戻り対応版:index.html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -104,17 +104,21 @@
                 <p id="finalRank" class="text-lg font-black text-yellow-300 animate-pulse mt-0.5">？？？</p>
             </div>
 
-            <div class="w-full flex flex-col items-center gap-2">
-                <button id="restartButton" class="w-full max-w-[240px] py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-sm shadow-lg hover:scale-105 active:scale-95 transition-all text-white border-2 border-white">
-                    もういっかい遊ぶ！
+            <div class="w-full flex flex-col items-center gap-1.5 max-h-[190px] overflow-y-auto px-2">
+                <button id="restartButton" class="w-full max-w-[240px] py-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full font-black text-xs md:text-sm shadow-lg hover:scale-105 active:scale-95 transition-all text-white border-2 border-white flex-shrink-0">
+                    同じ設定でもういっかい！
                 </button>
 
-                <button id="downloadImageButton" class="w-full max-w-[240px] py-2 bg-amber-500 hover:bg-amber-600 rounded-full font-black text-sm flex items-center justify-center gap-2 transition-all text-white border border-white/10 hover:scale-105 active:scale-95">
+                <button id="toTitleButton" class="w-full max-w-[240px] py-2 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-500 hover:to-slate-600 rounded-full font-black text-xs md:text-sm shadow-lg hover:scale-105 active:scale-95 transition-all text-white border-2 border-slate-400 flex-shrink-0">
+                    🔄 コースを選び直す（タイトルへ）
+                </button>
+
+                <button id="downloadImageButton" class="w-full max-w-[240px] py-1.5 bg-amber-500 hover:bg-amber-600 rounded-full font-black text-xs flex items-center justify-center gap-2 transition-all text-white border border-white/10 hover:scale-105 active:scale-95 flex-shrink-0">
                     📥 結果を画像として保存 (DL)
                 </button>
 
-                <button id="shareTwitterButton" class="w-full max-w-[240px] py-2 bg-[#1da1f2] hover:bg-[#1a91da] rounded-full font-black text-sm flex items-center justify-center gap-2 transition-all text-white border border-white/10 hover:scale-105 active:scale-95">
-                    <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <button id="shareTwitterButton" class="w-full max-w-[240px] py-1.5 bg-[#1da1f2] hover:bg-[#1a91da] rounded-full font-black text-xs flex items-center justify-center gap-2 transition-all text-white border border-white/10 hover:scale-105 active:scale-95 flex-shrink-0">
+                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
                     </svg>
                     結果を𝕏にテキスト投稿する
@@ -137,7 +141,7 @@
 
 <script>
 /**
- * おしりぺんぺんゲーム メインシステム（画像保存＆SNS対応完全版）
+ * おしりぺんぺんゲーム メインシステム（コース変更・タイトル戻り対応完全版）
  */
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -146,6 +150,7 @@ const startScreen = document.getElementById('startScreen');
 const startButton = document.getElementById('startButton');
 const resultScreen = document.getElementById('resultScreen');
 const restartButton = document.getElementById('restartButton');
+const toTitleButton = document.getElementById('toTitleButton'); // タイトル戻り
 const shareTwitterButton = document.getElementById('shareTwitterButton');
 const downloadImageButton = document.getElementById('downloadImageButton');
 const muteButton = document.getElementById('muteButton');
@@ -425,6 +430,17 @@ muteButton.addEventListener('click', (e) => {
 startButton.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 restartButton.addEventListener('click', (e) => { e.stopPropagation(); startGame(); });
 
+// コースを選び直す（タイトル画面に戻る）イベント
+toTitleButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    initAudio();
+    gameState = "READY";
+    resultScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+    playSound('hit');
+    updateMenuUI();
+});
+
 // 𝕏 (Twitter) テキストシェア処理
 shareTwitterButton.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -562,7 +578,7 @@ function handleTap(laneIndex) {
         if (notes[i].lane === laneIndex) {
             const dist = Math.abs(notes[i].y - targetY);
             if (dist < minDistance) {
-                minDistance = dist;
+                dist = minDistance;
                 targetNoteIndex = i;
             }
         }
@@ -777,7 +793,7 @@ function drawPerfectButt(ctx, timestamp) {
         ctx.save();
         ctx.fillStyle = `rgba(239, 68, 68, ${b1.redness * 0.38})`;
         ctx.beginPath();
-        ctx.ellipse(cx + baseW * 0.5, cy + 25, 40, 35, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx - baseW * 0.5, cy + 25, 40, 35, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
     }
@@ -876,7 +892,7 @@ function gameLoop(timestamp) {
 
         for (let i = 0; i < notes.length; i++) {
             notes[i].y += currentSpeed;
-            drawHand(ctx, lanes[notes[i].lane].x, notes[i].y, notes[i].lane === 0);
+            drawHand(ctx, lanes[notes[i].lane].x, notes[notes[i].lane === 0]);
 
             if (notes[i].y > butts[notes[i].lane].targetY + 75) {
                 const lane = notes[i].lane;
@@ -976,14 +992,12 @@ function gameLoop(timestamp) {
         ctx.restore();
     }
 
-    // ★画像保存用：ゲームオーバー画面をCanvas側にも直接レンダリング
+    // ゲームオーバー画面レンダリング（Canvas側）
     if (gameState === "GAMEOVER") {
         ctx.save();
-        // 背景を薄暗くマスク
         ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // リザルトボードの枠
         ctx.fillStyle = "#ffffff";
         ctx.strokeStyle = "#e11d48";
         ctx.lineWidth = 5;
@@ -992,7 +1006,6 @@ function gameLoop(timestamp) {
         ctx.fill();
         ctx.stroke();
 
-        // ヘッダーテキスト
         ctx.fillStyle = "#e11d48";
         ctx.font = "900 26px sans-serif";
         ctx.textAlign = "center";
@@ -1004,7 +1017,6 @@ function gameLoop(timestamp) {
         ctx.font = "bold 13px sans-serif";
         ctx.fillText(`【 プレイ環境：${modeLabel} 】`, canvas.width / 2, 125);
 
-        // スコア背景パネル
         ctx.fillStyle = "#fff1f2";
         ctx.beginPath();
         ctx.roundRect(60, 150, canvas.width - 120, 95, 16);
@@ -1018,12 +1030,10 @@ function gameLoop(timestamp) {
         ctx.font = "900 38px monospace";
         ctx.fillText(`${score} 点`, canvas.width / 2, 222);
 
-        // コンボ数
         ctx.fillStyle = "#b45309";
         ctx.font = "900 18px sans-serif";
         ctx.fillText(`🔥 最大コンボ: ${maxCombo} 回`, canvas.width / 2, 282);
 
-        // 称号枠
         ctx.fillStyle = "#6b7280";
         ctx.font = "bold 12px sans-serif";
         ctx.fillText("授与された称号", canvas.width / 2, 330);
@@ -1032,7 +1042,6 @@ function gameLoop(timestamp) {
         ctx.font = "900 21px sans-serif";
         ctx.fillText(currentRankName, canvas.width / 2, 368);
 
-        // フッター署名 ＆ 開発者クレジット（画像保存時にも残る設計）
         ctx.fillStyle = "#9ca3af";
         ctx.font = "bold 11px monospace";
         ctx.fillText("めざせ神速！パーフェクト・おしりぺんぺん", canvas.width / 2, 422);
