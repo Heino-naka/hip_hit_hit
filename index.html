@@ -1,4 +1,4 @@
-:おしりぺんぺん達人・画像ダウンロード機能搭載版:index.html
+:おしりぺんぺん達人・へいなか様クレジット＆画像DL搭載版:index.html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -123,11 +123,16 @@
         </div>
     </div>
 
-    <div class="w-full max-w-md flex justify-between items-center bg-white/80 backdrop-blur px-4 py-2 rounded-xl shadow-md border border-amber-100 text-sm font-bold text-amber-900 z-10">
-        <div>操作: <span class="bg-amber-200 px-1.5 py-0.5 rounded">D</span>(左) <span class="bg-amber-200 px-1.5 py-0.5 rounded">J</span>(右) / 画面タップ</div>
-        <button id="muteButton" class="px-3 py-1 bg-amber-100 rounded-lg hover:bg-amber-200 transition-colors flex items-center gap-1">
-            <span>🔊</span><span>音あり</span>
-        </button>
+    <div class="w-full max-w-md flex flex-col items-center gap-2 bg-white/80 backdrop-blur px-4 py-2.5 rounded-xl shadow-md border border-amber-100 font-bold text-amber-900 z-10">
+        <div class="w-full flex justify-between items-center text-sm">
+            <div>操作: <span class="bg-amber-200 px-1.5 py-0.5 rounded">D</span>(左) <span class="bg-amber-200 px-1.5 py-0.5 rounded">J</span>(右) / タップ</div>
+            <button id="muteButton" class="px-3 py-1 bg-amber-100 rounded-lg hover:bg-amber-200 transition-colors flex items-center gap-1 text-xs">
+                <span>🔊</span><span>音あり</span>
+            </button>
+        </div>
+        <div class="text-[11px] text-amber-800/80 tracking-wider pt-1 border-t border-amber-900/10 w-full text-center">
+            Created by <a href="https://lit.link/heinaka" target="_blank" rel="noopener noreferrer" class="text-rose-600 hover:text-rose-700 underline decoration-rose-400/50 transition-all">へいなか</a>
+        </div>
     </div>
 
 <script>
@@ -166,7 +171,7 @@ let chosenTime = 30;
 let timeLeft = 30;
 let timerInterval = null;
 let isMuted = false;
-let currentRankName = ""; // シェア・画像描画用の称号テキスト
+let currentRankName = ""; 
 
 const UNLOCK_SCORE_LIMIT = 8000;
 
@@ -426,7 +431,7 @@ shareTwitterButton.addEventListener('click', (e) => {
     let modeLabel = `${chosenTime}秒モード`;
     if (chosenTime === 60) modeLabel = "👑 隠し・伝説の60秒モード 👑";
     
-    const shareText = `🍑 おしりぺんぺん達人 🍑\n【プレイモード】 ${modeLabel}\n【今回のスコア】 ${score} 点\n【最大コンボ】 ${maxCombo} ぺんぺん\n【獲得した称号】 ${currentRankName}\n\n保存した画像を添付して神速リズムを自慢しよう！\n#おしりぺんぺん達人 #音ゲー #無料ゲーム`;
+    const shareText = `🍑 おしりぺんぺん達人 🍑\n【プレイモード】 ${modeLabel}\n【今回のスコア】 ${score} 点\n【最大コンボ】 ${maxCombo} ぺんぺん\n【獲得した称号】 ${currentRankName}\n\nCreated by @heinaka\n保存した結果画像を添付して神速リズムを自慢しよう！\n#おしりぺんぺん達人 #音ゲー #無料ゲーム`;
     const gameUrl = window.location.href;
     const twitterIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(gameUrl)}`;
     window.open(twitterIntentUrl, '_blank', 'noopener,noreferrer');
@@ -1027,11 +1032,18 @@ function gameLoop(timestamp) {
         ctx.font = "900 21px sans-serif";
         ctx.fillText(currentRankName, canvas.width / 2, 368);
 
-        // フッター署名
+        // フッター署名 ＆ 開発者クレジット（画像保存時にも残る設計）
         ctx.fillStyle = "#9ca3af";
         ctx.font = "bold 11px monospace";
-        ctx.fillText("めざせ神速！パーフェクト・おしりぺんぺん", canvas.width / 2, 428);
-        ctx.fillText(" Oshiri Penpen Master v3", canvas.width / 2, 448);
+        ctx.fillText("めざせ神速！パーフェクト・おしりぺんぺん", canvas.width / 2, 422);
+        
+        ctx.fillStyle = "#b45309";
+        ctx.font = "bold 12px sans-serif";
+        ctx.fillText("Created by へいなか", canvas.width / 2, 446);
+        
+        ctx.fillStyle = "#d1d5db";
+        ctx.font = "900 9px sans-serif";
+        ctx.fillText("Oshiri Penpen Master v3", canvas.width / 2, 464);
         
         ctx.restore();
     }
